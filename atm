@@ -1,0 +1,144 @@
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+
+enum TransactionType {
+    DEPOSIT,
+    WITHDRAWAL,
+    TRANSFER
+}
+
+class User {
+    private String userId;
+    private int pin;
+
+    public User(String userId, int pin) {
+        this.userId = userId;
+        this.pin = pin;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public int getPin() {
+        return pin;
+    }
+}
+
+class Transaction {
+    private TransactionType type;
+    private double amount;
+    private Date timestamp;
+
+    public Transaction(TransactionType type, double amount) {
+        this.type = type;
+        this.amount = amount;
+        this.timestamp = new Date();
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+}
+
+class Account {
+    private String accountNumber;
+    private double balance;
+    private ArrayList<Transaction> transactionHistory;
+
+    public Account(String accountNumber) {
+        this.accountNumber = accountNumber;
+        this.balance = 0.0;
+        this.transactionHistory = new ArrayList<>();
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+        transactionHistory.add(new Transaction(TransactionType.DEPOSIT, amount));
+    }
+
+    public void withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            transactionHistory.add(new Transaction(TransactionType.WITHDRAWAL, amount));
+        } else {
+            System.out.println("Insufficient funds.");
+        }
+    }
+
+    public void transfer(double amount, Account recipientAccount) {
+        if (balance >= amount) {
+            balance -= amount;
+            recipientAccount.deposit(amount);
+            transactionHistory.add(new Transaction(TransactionType.TRANSFER, amount));
+        } else {
+            System.out.println("Insufficient funds.");
+        }
+    }
+
+    public ArrayList<Transaction> getTransactionHistory() {
+        return transactionHistory;
+    }
+}
+
+public class ATM {
+    private static ArrayList<User> users = new ArrayList<>();
+
+    public static void main(String[] args) {
+        // Dummy data
+        users.add(new User("user1", 1234));
+        users.add(new User("user2", 5678));
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter User ID: ");
+        String userId = scanner.nextLine();
+
+        System.out.print("Enter PIN: ");
+        int pin = scanner.nextInt();
+        scanner.nextLine(); // Consume newline character
+
+        User user = authenticateUser(userId, pin);
+        if (user != null) {
+            System.out.println("Authentication successful.");
+
+            // ATM functionality unlocked
+            Account account = new Account(userId); // For simplicity, using userId as account number
+            // Example operations
+            account.deposit(1000);
+            account.withdraw(500);
+            // You can add more operations here like transfer, view transaction history,
+            // etc.
+        } else {
+            System.out.println("Authentication failed. Invalid User ID or PIN.");
+        }
+
+        scanner.close();
+    }
+
+    private static User authenticateUser(String userId, int pin) {
+        for (User user : users) {
+            if (user.getUserId().equals(userId) && user.getPin() == pin) {
+                return user;
+            }
+        }
+        return null;
+    }
+}
